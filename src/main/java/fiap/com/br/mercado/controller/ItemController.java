@@ -17,66 +17,83 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import fiap.com.br.mercado.model.UserModel;
-import fiap.com.br.mercado.repository.UserRepository;
+import fiap.com.br.mercado.model.ItemModel;
+import fiap.com.br.mercado.repository.ItemRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/item")
 @Slf4j
-@Cacheable(value = "user")
-public class UserController {
+@Cacheable(value = "item")
+
+public class ItemController {
 
     @Autowired
-    private UserRepository repository;
+    private ItemRepository repositoryItem;
 
     @GetMapping
     @Cacheable
-    public List<UserModel> index() {
-        return repository.findAll();
+    public List<ItemModel> index() {
+        return repositoryItem.findAll();
     }
 
     @PostMapping
     @CacheEvict(allEntries = true)
     @Operation(responses = @ApiResponse(responseCode = "400"))
     @ResponseStatus(HttpStatus.CREATED)
-    public UserModel create(@RequestBody @Valid UserModel userModel) {
-        log.info("Cadastrando usuario " + userModel.getName());
-        return repository.save(userModel);
+    public ItemModel create(@RequestBody @Valid ItemModel itemModel) {
+        log.info("Cadastrando item " + itemModel.getName());
+        return repositoryItem.save(itemModel);
     }
 
     @GetMapping("/{name}")
-    public UserModel get(@PathVariable String name) {
-        log.info("Buscando usuario" + name);
-        return getUser(name);
+    public ItemModel getNome(@PathVariable String name) {
+        log.info("Buscando item: " + name);
+        return getItem(name);
     }
 
-    @PutMapping("{name}")
+    @PutMapping("/{name}")
     @CacheEvict(allEntries = true)
-    public UserModel update(@PathVariable String name, @RequestBody UserModel user) {
-        log.info("Atualizando nome do usuário " + name + " para " + user.getName());
-        UserModel existingUser = getUser(name); // Método que busca o usuário pelo nome
-        existingUser.setName(user.getName());
-        return repository.save(existingUser);
+    public ItemModel update(@PathVariable String name, @RequestBody ItemModel item) {
+        log.info("Atualizando dados do item " + name);
+
+        ItemModel existingItem = getItem(name);
+        if (item.getName() != null) {
+            existingItem.setName(item.getName());
+        }
+        if (item.getTipo() != null) {
+            existingItem.setTipo(item.getTipo());
+        }
+        if (item.getRaridade() != null) {
+            existingItem.setRaridade(item.getRaridade());
+        }
+        if (item.getPreco() != null) {
+            existingItem.setPreco(item.getPreco());
+        }
+        if (item.getDono() != null) {
+            existingItem.setDono(item.getDono());
+        }
+
+        return repositoryItem.save(existingItem);
     }
 
     @DeleteMapping("{name}")
     @CacheEvict(allEntries = true)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(@PathVariable String name) {
-        log.info("Apagando usuario " + name);
-        repository.delete(getUser(name));
+        log.info("Apagando item " + name);
+        repositoryItem.delete(getItem(name));
     }
 
-    private UserModel getUser(String name) {
-        return repository
+    private ItemModel getItem(String name) {
+        return repositoryItem
                 .findByName(name)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Usuario " + name + "  não encontrado"));
+                                "Item " + name + "  não encontrado"));
     }
 
 }
