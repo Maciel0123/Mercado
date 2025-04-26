@@ -48,35 +48,72 @@ public class UserController {
         return repository.save(userModel);
     }
 
-    @GetMapping("/{name}")
-    public UserModel get(@PathVariable String name) {
+    @GetMapping("/nome/{name}")
+    public List<UserModel> get(@PathVariable String name) {
         log.info("Buscando usuario" + name);
-        return getUser(name);
+        return getUserName(name);
     }
 
-    @PutMapping("{name}")
+    @GetMapping("classe/{classe}")
+    public List<UserModel> getClasse(@PathVariable String classe) {
+        log.info("Buscando usuario" + classe);
+        return getUserClasse(classe);
+    }
+
+    @PutMapping("{id}")
     @CacheEvict(allEntries = true)
-    public UserModel update(@PathVariable String name, @RequestBody UserModel user) {
-        log.info("Atualizando nome do usuário " + name + " para " + user.getName());
-        UserModel existingUser = getUser(name); // Método que busca o usuário pelo nome
-        existingUser.setName(user.getName());
+    public UserModel update(@PathVariable Long id, @RequestBody UserModel user) {
+        log.info("Atualizando o id de usuario: " + id + " para " + user.getName());
+        UserModel existingUser = getUserId(id);
+        if (user.getName() != null) {
+            existingUser.setName(user.getName());
+        }
+        if (user.getClasse() != null) {
+            existingUser.setClasse(user.getClasse());
+        }
+        if (user.getNivel() != null) {
+            existingUser.setNivel(user.getNivel());
+        }
+        if (user.getMoedas() != null) {
+            existingUser.setMoedas(user.getMoedas());
+        }
+       
         return repository.save(existingUser);
     }
 
-    @DeleteMapping("{name}")
+    @DeleteMapping("{id}")
     @CacheEvict(allEntries = true)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void destroy(@PathVariable String name) {
-        log.info("Apagando usuario " + name);
-        repository.delete(getUser(name));
+    public void destroy(@PathVariable Long id) {
+        log.info("Apagando usuario " + id);
+        repository.delete(getUserId(id));
     }
 
-    private UserModel getUser(String name) {
+    private List<UserModel> getUserName(String name){
+        List<UserModel> users = repository.findByName(name);
+        if (users.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Usuario" + name + " não encontrado");
+        }
+        return users;
+    }
+
+    private List<UserModel> getUserClasse(String classe){
+        List<UserModel> users = repository.findByClasse(classe);
+        if (users.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Nenhuma clase: " + classe + " encotrada");
+        }
+        return users;
+                
+    }
+
+    private UserModel getUserId(Long id) {
         return repository
-                .findByName(name)
+                .findById(id)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Usuario " + name + "  não encontrado"));
+                                "Usuario " + id + "  não encontrado"));
     }
 
 }

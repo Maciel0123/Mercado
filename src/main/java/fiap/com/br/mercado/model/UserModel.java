@@ -26,8 +26,8 @@ public class UserModel {
     private String classe;
     @Min(1)
     @Max(99)
-    private int nivel;
-    private double moedas;
+    private Integer nivel;
+    private Double moedas;
 
     public Long getId() {
         return id;
@@ -47,16 +47,16 @@ public class UserModel {
     public void setClasse(String classe) {
         this.classe = classe;
     }
-    public int getNivel() {
+    public Integer getNivel() {
         return nivel;
     }
-    public void setNivel(int nivel) {
+    public void setNivel(Integer nivel) {
         this.nivel = nivel;
     }
-    public double getMoedas() {
+    public Double getMoedas() {
         return moedas;
     }
-    public void setMoedas(double moedas) {
+    public void setMoedas(Double moedas) {
         this.moedas = moedas;
     }
 
